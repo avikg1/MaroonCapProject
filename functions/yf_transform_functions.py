@@ -2,31 +2,46 @@ import yfinance as yf
 import pandas as pd
 
 def get_basic_matrix(stocks, start_date, end_date):
-    # Initialize an empty DataFrame
-    df = pd.DataFrame()
-    
-    # Variable to track if the index has been set
+    series_list = []
     index_set = False
-    
+    valid_stocks = []  # Keep track of valid stocks
+
     for stock in stocks:
         temp_ticker = yf.Ticker(stock)
         try:
-            # Attempt to fetch historical data for the given date range
             temp_history = temp_ticker.history(start=start_date, end=end_date)
-            
-            # If data is successfully fetched and the DataFrame is not empty
-            if not temp_history.empty:
-                # If the index hasn't been set yet, set it using the first successfully fetched stock
+            if not temp_history.empty and 'Close' in temp_history.columns:
+                close_series = temp_history["Close"].rename(stock)
+                series_list.append(close_series)
+                valid_stocks.append(stock)  # Add to valid stocks list
                 if not index_set:
-                    df.index = temp_history.index
+                    index = temp_history.index
                     index_set = True
-                
-                # Add the closing prices to the DataFrame
-                df[stock] = temp_history["Close"]
+            else:
+                raise ValueError(f"No valid data for {stock}, symbol may be delisted.")
         except Exception as e:
-            # If an error occurs (e.g., ticker doesn't exist), skip this ticker
             print(f"Skipping {stock} due to error: {e}")
+
+    if series_list:
+        df = pd.concat(series_list, axis=1)
+        if index_set:
+            df.index = index
+    else:
+        df = pd.DataFrame(index=index if index_set else [])
     
+    print(f"Valid stocks processed: {valid_stocks}")
+    return df
+    
+    # Concatenate all series along the columns
+    if series_list:
+        df = pd.concat(series_list, axis=1, keys=[s.name for s in series_list])
+        # Set the index if it was determined
+        if index_set:
+            df.index = index
+    else:
+        # Return an empty DataFrame with the appropriate index if no data was fetched
+        df = pd.DataFrame(index=index if index_set else [])
+
     return df
 
 def get_corr_matrix(stocks, start_date, end_date):
@@ -53,26 +68,19 @@ def get_long_df(stocks, start_date, end_date, period_time):
     return final
 
 def fetch_stock_attributes(tickers, attributes):
-    # Initialize an empty list to store the data
     data = []
-    
-    # Iterate over each ticker
     for ticker in tickers:
-        temp_ticker = yf.Ticker(ticker)
-        info = temp_ticker.info
-        
-        # Fetch each attribute for the ticker, use None if the attribute is not found
-        row = [info.get(attribute, None) for attribute in attributes]
-        
-        # Insert the ticker at the beginning of the row
-        row.insert(0, ticker)
-        
-        # Append the row to the data list
+        row = [ticker] + [None] * len(attributes)  # Pre-fill row with None
+        try:
+            temp_ticker = yf.Ticker(ticker)
+            info = temp_ticker.info
+            # Replace None with actual data if available
+            for i, attribute in enumerate(attributes):
+                row[i+1] = info.get(attribute, None)
+        except Exception as e:
+            print(f"An error occurred for {ticker}: {e}.")
         data.append(row)
-    
-    # Create a DataFrame from the data
-    # The columns are the stock tickers plus the attributes
+
     columns = ['Stock'] + attributes
     df = pd.DataFrame(data, columns=columns)
-    
     return df
