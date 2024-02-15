@@ -16,7 +16,6 @@ GROUP_TIME_PERIOD = "M"
 
 ticker_file = "/Users/avikgarg/repo/MaroonCapProject/raw/stockslist.txt" #have to change
 STOCKS = read_stock_tickers(ticker_file)
-
 """
 #pull price data
 price_data = get_long_df(STOCKS, START_DATE, END_DATE, GROUP_TIME_PERIOD).reset_index()
@@ -45,6 +44,9 @@ three_month_df = transform_fed_data(three_month_path, START_DATE, END_DATE,
     GROUP_TIME_PERIOD)
 ten_year_df = transform_fed_data(ten_year_path, START_DATE, END_DATE,
     GROUP_TIME_PERIOD)
+
+three_month_df.to_csv("~/repo/MaroonCapProject/clean/cleaned_three_month_rate.csv")
+ten_year_df.to_csv("~/repo/MaroonCapProject/clean/cleaned_ten_year_rate.csv")
 
 #do merges
 merged_df = pd.merge(price_data, mcap_pe, left_on = "Stock", right_on = "Stock", how = "left")
