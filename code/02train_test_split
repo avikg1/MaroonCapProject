@@ -1,0 +1,21 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv("~/repo/MaroonCapProject/clean/cleaned_data.csv")
+
+df['Date'] = pd.to_datetime(df['Date'])
+
+# Split the DataFrame based on the date condition
+before_october = df[df['Date'] < '2022-10-01']
+after_or_in_october = df[df['Date'] >= '2022-10-01']
+
+# Split each subset into training and testing sets
+train_before_october, test_before_october = train_test_split(before_october, test_size=0.2, random_state=42)
+train_after_or_in_october, test_after_or_in_october = train_test_split(after_or_in_october, test_size=0.2, random_state=42)
+
+# Combine the training sets and the testing sets from both splits
+train_data = pd.concat([train_before_october, train_after_or_in_october])
+test_data = pd.concat([test_before_october, test_after_or_in_october])
+
+train_data.to_csv("~/repo/MaroonCapProject/clean/train_data.csv")
+test_data.to_csv("~/repo/MaroonCapProject/clean/test_data.csv")
