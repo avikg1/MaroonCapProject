@@ -8,12 +8,6 @@ train_dates <- read.csv("clean/train_data.csv")
 test_dates <- read.csv("clean/test_data.csv")
 price_data <- read.csv("raw/raw_data.csv")
 
-price_data_test <- price_data %>%
-  filter(Date %in% test_dates$Date)
-
-price_data_train <- price_data %>%
-  filter(Date %in% train_dates$Date)
-
 ordered_results <- regression_results %>%
   mutate(sum = SMB + HML) %>%
   arrange(sum)
@@ -29,6 +23,16 @@ sell_list <- ordered_results$STOCK[1:rows_to_extract]
 
 # Extract the last 10% for the buy list
 buy_list <- ordered_results$STOCK[(num_rows - rows_to_extract + 1):num_rows]
+
+
+above_av_months_df <- long_interest %>% filter(FEDFUNDS > mean(FEDFUNDS))
+above_av_dates <- above_av_months_df$DATE
+
+high_int_test <- price_data %>%
+  filter(Date %in% test_dates$Date, Date %in% above_av_dates)
+
+low_int_test <- price_data %>%
+  filter(Date %in% test_dates$Date, !Date %in% above_av_dates)
 
 buy_profit_df <- price_data_test %>%
   filter(Stock %in% buy_list) %>%
