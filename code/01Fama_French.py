@@ -1,8 +1,9 @@
 import sys
 import pandas as pd
 import numpy as np
+from check_user import DIR_PATH
 
-sys.path.append("/Users/avikgarg/repo/MaroonCapProject/functions") #have to change
+sys.path.append(f"{DIR_PATH}/MaroonCapProject/functions") # Add functions module to the path
 
 from yf_transform_functions import get_long_df
 from yf_transform_functions import fetch_stock_attributes
@@ -10,13 +11,13 @@ from other_functions import transform_fed_data
 from other_functions import calculate_fama_french_factors
 from other_functions import read_stock_tickers
 
-price_data = pd.read_csv("~/repo/MaroonCapProject/raw/raw_data.csv", parse_dates=['Date'])
+price_data = pd.read_csv(f"{DIR_PATH}/MaroonCapProject/raw/raw_data.csv", parse_dates=['Date'])
 
 
-mcap_pe = pd.read_csv("~/repo/MaroonCapProject/raw/raw_attributes.csv")
+mcap_pe = pd.read_csv(f"{DIR_PATH}/MaroonCapProject/raw/raw_attributes.csv")
 
-three_month_df = pd.read_csv("~/repo/MaroonCapProject/clean/cleaned_three_month_rate.csv", parse_dates=['DATE'])
-ten_year_df = pd.read_csv("~/repo/MaroonCapProject/clean/cleaned_ten_year_rate.csv", parse_dates=['DATE'])
+three_month_df = pd.read_csv(f"{DIR_PATH}/MaroonCapProject/clean/cleaned_three_month_rate.csv", parse_dates=['DATE'])
+ten_year_df = pd.read_csv(f"{DIR_PATH}/MaroonCapProject/clean/cleaned_ten_year_rate.csv", parse_dates=['DATE'])
 
 #do merges
 merged_df = pd.merge(price_data, mcap_pe, left_on = "Stock", right_on = "Stock", how = "left")
@@ -44,4 +45,4 @@ final = pd.merge(final, three_month_df, left_on= "Date", right_on= "DATE", how='
 final = pd.merge(final, ten_year_df, left_on = "Date", right_on = "DATE", how='left').reset_index()
 final.rename(columns = {"TB3MS": "Risk_Free", "FEDFUNDS": "Long_Rate"}, inplace = True)
 
-final.to_csv("~/repo/MaroonCapProject/clean/cleaned_data.csv")
+final.to_csv(f"{DIR_PATH}/MaroonCapProject/clean/cleaned_data.csv")

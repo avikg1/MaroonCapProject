@@ -1,6 +1,10 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
+from check_user import DIR_PATH
+
+sys.path.append(f"{DIR_PATH}/MaroonCapProject/functions") # Add functions module to the path
+
 def preprocess_data(file_path):
     data = pd.read_csv(file_path, header=0, usecols=["Market", "Risk_Free", "SMB", "HML", "Long_Rate"])
     data["SMB_interaction"] = data["SMB"] * data["Long_Rate"]
@@ -38,10 +42,10 @@ everyday = preprocess_data(file_path)
 returner_df = pd.read_csv(file_path, header=0).drop(["index", "Date", "Market", "SMB", "HML", "Long_Rate"], axis=1)
 
 # Calculate interactions for different factor models
-for factors, output_file in [(["SMB", "HML", "SMB_interaction", "HML_interaction", "M-RF"], "~/repo/MaroonCapProject/clean/BIGGESTWIN.csv"),
-                             (["SMB", "SMB_interaction", "M-RF"], "~/repo/MaroonCapProject/clean/SMB_win.csv"),
-                             (["HML", "HML_interaction", "M-RF"], "~/repo/MaroonCapProject/clean/HML_win.csv"),
-                             (["HML", "SMB", "M-RF"], "~/repo/MaroonCapProject/clean/classic.csv")]:
+for factors, output_file in [(["SMB", "HML", "SMB_interaction", "HML_interaction", "M-RF"], f"{DIR_PATH}/MaroonCapProject/clean/BIGGESTWIN.csv"),
+                             (["SMB", "SMB_interaction", "M-RF"], f"{DIR_PATH}/MaroonCapProject/clean/SMB_win.csv"),
+                             (["HML", "HML_interaction", "M-RF"], f"{DIR_PATH}/MaroonCapProject/clean/HML_win.csv"),
+                             (["HML", "SMB", "M-RF"], f"{DIR_PATH}/MaroonCapProject/clean/classic.csv")]:
     interactions_data = calculate_interactions(everyday, returner_df, factors)
     columns_names = ['Stock'] + factors + ['R_squared']  # Add 'R_squared' to the column names
     interactions_df = pd.DataFrame(interactions_data, columns=columns_names)
