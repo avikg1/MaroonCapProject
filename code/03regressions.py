@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+import sys
 
 from check_user import DIR_PATH
 
@@ -33,7 +34,7 @@ def calculate_interactions(data, returner_df, factors):
 
 # Constants
 min_num_of_data_points = 120
-file_path = '~/repo/MaroonCapProject/clean/train_data.csv'
+file_path = f'{DIR_PATH}/MaroonCapProject/clean/train_data.csv'
 
 # Preprocess data
 everyday = preprocess_data(file_path)

@@ -1,7 +1,11 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
+import sys
+from check_user import DIR_PATH
 
-df = pd.read_csv("~/repo/MaroonCapProject/clean/cleaned_data.csv")
+sys.path.append(f"{DIR_PATH}/MaroonCapProject/functions") # Add functions module to the path
+
+df = pd.read_csv(f"{DIR_PATH}/MaroonCapProject/clean/cleaned_data.csv")
 
 df['Date'] = pd.to_datetime(df['Date'])
 
@@ -17,5 +21,5 @@ train_after_or_in_october, test_after_or_in_october = train_test_split(after_or_
 train_data = pd.concat([train_before_october, train_after_or_in_october])
 test_data = pd.concat([test_before_october, test_after_or_in_october])
 
-train_data.to_csv("~/repo/MaroonCapProject/clean/train_data.csv")
-test_data.to_csv("~/repo/MaroonCapProject/clean/test_data.csv")
+train_data.to_csv(f"{DIR_PATH}/MaroonCapProject/clean/train_data.csv")
+test_data.to_csv(f"{DIR_PATH}/MaroonCapProject/clean/test_data.csv")
