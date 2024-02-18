@@ -10,8 +10,10 @@ def read_stock_tickers(filepath):
                 tickers.append(stripped)
     return tickers
 
+def annual_to_monthly_rate(annual_rate):
+    return (1 + annual_rate) ** (1/12) - 1
 
-def transform_fed_data(filepath, start_date, end_date, period_time):
+def transform_fed_data(filepath, start_date, end_date, period_time, annualization_factor):
     df = pd.read_csv(filepath, parse_dates=['DATE'], index_col='DATE')
     
     # Filter the dataset for the specified date range
@@ -22,6 +24,7 @@ def transform_fed_data(filepath, start_date, end_date, period_time):
     resampled_df = filtered_df.resample(period_time).mean()
 
     resampled_df.index = resampled_df.index.tz_localize(None)
+    resampled_df.iloc[:, 0] = resampled_df.iloc[:, 0].apply(annual_to_monthly_rate)
 
     return resampled_df
 
@@ -32,7 +35,7 @@ def calculate_fama_french_factors(df):
     grouped_by_date = df.groupby('Date')
     
     for date, group in grouped_by_date:
-        valid_group = group.dropna(subset=['Return', 'MarketCap'])
+        valid_group = group.replace([np.inf, -np.inf], np.nan).dropna(subset=['Return', 'MarketCap', 'trailingPE'])
         # Calculate returns and market cap for the group
         total_market_cap = valid_group['MarketCap'].sum()
         valid_group['Weight'] = valid_group['MarketCap'] / total_market_cap
