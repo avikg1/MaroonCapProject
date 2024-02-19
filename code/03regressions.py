@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 import sys
+import joblib
 
 from check_user import DIR_PATH
 
@@ -28,6 +29,11 @@ def calculate_interactions(data, returner_df, factors):
         y = merged_data["Return-Rf"].values.reshape(-1, 1)
 
         reg = LinearRegression().fit(X, y)
+        
+        if factors == ["SMB", "HML", "SMB_interaction", "HML_interaction", "M-RF"]:
+            model_filename = f'{DIR_PATH}/MaroonCapProject/clean/model/{contender}.joblib'
+            joblib.dump(reg, model_filename)
+
         r_squared = reg.score(X, y)  # Calculate R^2 score
         interactions.append([contender] + list(reg.coef_[0]) + [r_squared])  # Append R^2 score to interactions
     return interactions
@@ -56,6 +62,5 @@ for factors, output_file in [(["SMB", "HML", "SMB_interaction", "HML_interaction
     # Print out R^2 scores
     print(f"R^2 scores for {output_file}:")
     print(result_df[['Stock', 'R_squared']])
-    
-    result_df.drop(columns=['R_squared'], inplace=True)  # Optional: Drop 'R_squared' if not needed in the output file
+
     result_df.to_csv(output_file, index=False)

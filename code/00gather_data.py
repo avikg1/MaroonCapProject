@@ -28,6 +28,7 @@ ten_year_df = transform_fed_data(ten_year_path, START_DATE, END_DATE,
 three_month_df.to_csv(f"{DIR_PATH}/MaroonCapProject/clean/cleaned_three_month_rate.csv")
 ten_year_df.to_csv(f"{DIR_PATH}/MaroonCapProject/clean/cleaned_ten_year_rate.csv")
 
+exit(1)
 
 ticker_file = f"{DIR_PATH}/MaroonCapProject/raw/stockslist.txt"
 STOCKS = read_stock_tickers(ticker_file)

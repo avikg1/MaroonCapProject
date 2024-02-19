@@ -13,9 +13,9 @@ market_return <- read.csv("clean/cleaned_data.csv") %>%
 
 ##paramaters
 
-n = 0.5 #proportion of stocks that make up buy list and sell list
-HML_weight = 0.5
-buy_threshold = 2
+n = 0.2 #proportion of stocks that make up buy list and sell list
+HML_weight = 0.1
+buy_threshold = 0.9
 
 ##functions
 
@@ -25,9 +25,9 @@ calculate_period_profits <- function(data_frame, buy_list, sell_list) {
     filter(Stock %in% union(buy_list, sell_list)) %>%
     mutate(profit = case_when(
       Stock %in% buy_list & is_high_int  ~ 1000 / start * (end - start),
-      Stock %in% buy_list & !is_high_int ~ 1000 / start * (start - end),
-      Stock %in% sell_list & is_high_int ~ 1000 / start * (end - start),
-      TRUE ~ 1000 / start * (start - end)
+      Stock %in% buy_list & !is_high_int ~ 0,
+      Stock %in% sell_list & !is_high_int ~ 1000 / start * (end - start),
+      TRUE ~ 0
     )) %>%
     group_by(Date) %>%
     summarise(
@@ -60,10 +60,13 @@ calculate_alpha <- function(df, market) {
   # Linear regression of Portfolio_Excess_Return on Market_Excess_Return
   fit <- lm(Portfolio_Excess_Return ~ Market_Excess_Return, data = merged_df)
   
+  print(summary(fit))
+  
   # Alpha is the intercept
   alpha <- coef(fit)[1]
+  beta <- coef(fit)[2]
   
-  return(alpha)
+  return(list(alpha = alpha, beta = beta))
 }
 
 ##code
@@ -104,6 +107,28 @@ train_profits <- calculate_period_profits(train_data, buy_list, sell_list)
 calculate_sharpe_ratio(train_profits, market_return)
 calculate_alpha(train_profits, market_return)
 
+write.csv(train_profits, "clean/train_profits.csv")
+
 test_profits <- calculate_period_profits(test_data, buy_list, sell_list)
 calculate_sharpe_ratio(test_profits, market_return)
 calculate_alpha(test_profits, market_return)
+
+write.csv(test_profits, "clean/test_profits.csv")
+
+
+calculate_market_profits <- function(df, market) {
+  
+  # Merge df and market data frames on Date
+  merged_df <- market %>%
+    filter(Date %in% test_dates$Date)
+  
+  # Calculate excess returns for both portfolio and market
+  merged_df$profit <- merged_df$Market*1000*length(buy_list)
+  
+  merged_df <- merged_df %>%
+    select(Date, profit)
+  
+  return(merged_df)
+}
+
+write.csv(calculate_market_profits(test_dates, market_return), "clean/market_profits.csv")

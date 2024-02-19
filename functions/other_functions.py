@@ -11,7 +11,7 @@ def read_stock_tickers(filepath):
     return tickers
 
 def annual_to_monthly_rate(annual_rate):
-    return (1 + annual_rate) ** (1/12) - 1
+    return (1 + annual_rate / 100) ** (1/12) - 1
 
 def transform_fed_data(filepath, start_date, end_date, period_time, annualization_factor):
     df = pd.read_csv(filepath, parse_dates=['DATE'], index_col='DATE')
